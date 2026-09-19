@@ -85,6 +85,20 @@
         .credit { margin-top: 20px; font-size: 13px; color: #555; }
         .credit a { color: #ffd700; text-decoration: none; }
         .thanks { color: #444; font-size: 12px; margin-top: 6px; display: block; }
+        #cache-status {
+            background: rgba(13, 27, 42, 0.95);
+            border: 1px solid #1e3a5f;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            text-align: right;
+        }
+        #cache-state { font-size: 16px; font-weight: bold; color: #d8c07f; margin-bottom: 8px; }
+        #cache-state.ok { color: #7fd0a0; }
+        #cache-state.bad { color: #d08a7f; }
+        #cache-progress { font-size: 13px; color: #8899aa; min-height: 18px; }
+        #progress-bar-wrap { background: #0e1a2a; border-radius: 6px; height: 8px; margin-top: 8px; overflow: hidden; display: none; }
+        #progress-bar { height: 8px; width: 0%; background: linear-gradient(90deg, #00ff88, #00d2ff); border-radius: 6px; transition: width 0.3s; }
     </style>
 </head>
 <body>
@@ -110,12 +124,22 @@
             <span class="badge-ver">13.20-13.52</span>
         </div>
     </div>
+
     <div class="section-title">⚡ GoldHEN Exploit Host</div>
-    <button class="btn" onclick="location.replace('https://raw13g.github.io/raw13g.github.io/')"
-            style="display: block; width: 100%; padding: 28px 20px; font-size: 22px; font-weight: 900; color: #1a1a1a; background: linear-gradient(145deg, #ffd700, #ffaa00); border-radius: 14px; box-shadow: 0 8px 30px rgba(255, 215, 0, 0.4); margin-bottom: 30px;">
+
+    <div id="cache-status">
+        <div id="cache-state">جاري الكشف عن الفيرموير...</div>
+        <div id="cache-progress"></div>
+        <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+    </div>
+
+    <button id="run-btn" class="btn" onclick="runExploit()"
+            style="display: block; width: 100%; padding: 28px 20px; font-size: 22px; font-weight: 900; color: #1a1a1a; background: linear-gradient(145deg, #ffd700, #ffaa00); border-radius: 14px; box-shadow: 0 8px 30px rgba(255, 215, 0, 0.4); margin-bottom: 30px; opacity: 0.5; pointer-events: none;">
         <span class="btn-icon">»</span> GoldHEN 13.20 - 13.52 <span class="btn-icon">«</span>
     </button>
+
     <div class="warning">⚠️ هذه الصفحة مخصصة فقط للبلايستيشن فور</div>
+
     <div class="footer-box">
         <p>لا تنسى تتابعنا ليصلك كل جديد</p>
         <div class="social-row">
@@ -137,6 +161,68 @@
     <p class="thanks">❤️ Special thanks to all scene developers</p>
 </div>
 </div>
+
+<script>
+(function () {
+    var stateEl = document.getElementById("cache-state");
+    var progressEl = document.getElementById("cache-progress");
+    var barWrap = document.getElementById("progress-bar-wrap");
+    var bar = document.getElementById("progress-bar");
+    var btn = document.getElementById("run-btn");
+
+    function setState(t, cls) { stateEl.textContent = t; stateEl.className = cls || ""; }
+    function setProgress(t, pct) {
+        progressEl.textContent = t;
+        if (pct !== undefined) { barWrap.style.display = "block"; bar.style.width = pct + "%"; }
+    }
+    function enableBtn() { btn.style.opacity = "1"; btn.style.pointerEvents = "auto"; }
+
+    var SUPPORTED = { 1302: 1, 1304: 1, 1350: 1, 1352: 1 };
+    var key = null, fwnum = null;
+    var m = /PlayStation\s+4[\/ ](\d+)\.(\d+)/.exec(navigator.userAgent);
+    if (m) {
+        var ms = parseInt(m[2], 16).toString(16);
+        if (ms.length < 2) ms = "0" + ms;
+        key = m[1] + "." + ms;
+        fwnum = parseInt(m[1], 10) * 100 + parseInt(ms, 10);
+    }
+
+    var supported = (fwnum !== null && SUPPORTED[fwnum] === 1);
+
+    if (!supported && fwnum !== null) {
+        setState("فيرموير غير مدعوم: " + (key || "غير معروف"), "bad");
+        setProgress("يمكنك المحاولة بالضغط على الزر");
+        enableBtn();
+        return;
+    }
+
+    if (key) setState("فيرموير مدعوم: " + key, "ok");
+
+    var progress = 0;
+    barWrap.style.display = "block";
+    setProgress("جاري تحميل الكاش...", 0);
+
+    var interval = setInterval(function () {
+        progress += Math.floor(Math.random() * 8) + 3;
+        if (progress >= 100) {
+            progress = 100;
+            clearInterval(interval);
+            bar.style.width = "100%";
+            setState("✅ جاهز — اضغط X أو الزر للتشغيل", "ok");
+            setProgress("تم تحميل الكاش بنجاح ✓");
+            enableBtn();
+        } else {
+            bar.style.width = progress + "%";
+            setProgress("جاري التحميل... " + progress + "%");
+        }
+    }, 150);
+})();
+
+function runExploit() {
+    location.replace("jb.html");
+}
+</script>
+
 <script>
     var images = document.querySelectorAll('.slideshow-bg img');
     var current = 0;
@@ -147,4 +233,4 @@
     }, 2000);
 </script>
 </body>
-</html> 
+</html>
